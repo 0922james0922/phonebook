@@ -3,6 +3,9 @@
 #include <string.h>
 #include <time.h>
 #include <assert.h>
+#include "phonebook_opt.h"
+
+#define INPUT_SIZE 8
 
 #include IMPL
 
@@ -33,66 +36,53 @@ int main(int argc, char *argv[])
     fp = fopen(DICT_FILE, "r");
     if (fp == NULL) {
         printf("cannot open the file\n");
-        return -1;
+        return 0;
     }
 
-    /* build the entry */
-    entry *pHead, *e;
+    /* build the last name entry */
+    entry *pHead, *lne;
     pHead = (entry *) malloc(sizeof(entry));
     printf("size of entry : %lu bytes\n", sizeof(entry));
-    e = pHead;
-    e->pNext = NULL;
+    lne = pHead;
+    lne -> pNext = NULL;
 
-#if defined(__GNUC__)
-    __builtin___clear_cache((char *) pHead, (char *) pHead + sizeof(entry));
-#endif
     clock_gettime(CLOCK_REALTIME, &start);
     while (fgets(line, sizeof(line), fp)) {
         while (line[i] != '\0')
             i++;
         line[i - 1] = '\0';
         i = 0;
-        e = append(line, e);
+        lne = append(line, lne);
     }
     clock_gettime(CLOCK_REALTIME, &end);
     cpu_time1 = diff_in_second(start, end);
 
+ 
     /* close file as soon as possible */
-    fclose(fp);
-
-    e = pHead;
+//    fclose(fp);
+//too early to lose fp
+    lne = pHead;
 
     /* the givn last name to find */
     char input[MAX_LAST_NAME_SIZE] = "zyxel";
-    e = pHead;
+    lne = pHead;
 
-    assert(findName(input, e) &&
+    assert(findName(input, lne) &&
            "Did you implement findName() in " IMPL "?");
-    assert(0 == strcmp(findName(input, e)->lastName, "zyxel"));
+    assert(0 == strcmp(findName(input, lne)->lastName, "zyxel"));
 
-#if defined(__GNUC__)
-    __builtin___clear_cache((char *) pHead, (char *) pHead + sizeof(entry));
-#endif
     /* compute the execution time */
     clock_gettime(CLOCK_REALTIME, &start);
-    findName(input, e);
+    findName(input, lne);
     clock_gettime(CLOCK_REALTIME, &end);
     cpu_time2 = diff_in_second(start, end);
-
-    FILE *output;
-#if defined(OPT)
-    output = fopen("opt.txt", "a");
-#else
-    output = fopen("orig.txt", "a");
-#endif
-    fprintf(output, "append() findName() %lf %lf\n", cpu_time1, cpu_time2);
-    fclose(output);
 
     printf("execution time of append() : %lf sec\n", cpu_time1);
     printf("execution time of findName() : %lf sec\n", cpu_time2);
 
-    if (pHead->pNext) free(pHead->pNext);
+    /* FIXME: release all allocated entries */
     free(pHead);
+    fclose(fp);
 
     return 0;
 }
