@@ -73,7 +73,7 @@ entry *append(char lastName[], entry *lne)
 
 int hash (char lastName[])
 {
-    int seed = 26;
+    int seed = 31;
     long long hashNum = 0;
     
     while (*lastName)
