@@ -34,6 +34,12 @@ typedef struct Data  {
     char zip[5];
 } detail;
 
+int firstAppend;
+entry hashTable[8192];
+entry *tmp;
+
 entry *findName(char lastname[], entry *pHead);
 entry *append(char lastName[], entry *e);
+
+int hash(char lastName[]);
 #endif

@@ -3,11 +3,14 @@
 #include <string.h>
 #include <time.h>
 #include <assert.h>
-#include "phonebook_opt.h"
-
-#define INPUT_SIZE 8
 
 #include IMPL
+
+#ifdef OPT
+#define OUT_FILE "opt.txt"
+#else
+#define OUT_FILE "orig.txt"
+#endif
 
 #define DICT_FILE "./dictionary/words.txt"
 
@@ -46,6 +49,10 @@ int main(int argc, char *argv[])
     lne = pHead;
     lne -> pNext = NULL;
 
+#if defined(__GNUC__)
+    __builtin___clear_cache((char *) pHead, (char *) pHead + sizeof(entry));
+
+#endif
     clock_gettime(CLOCK_REALTIME, &start);
     while (fgets(line, sizeof(line), fp)) {
         while (line[i] != '\0')
